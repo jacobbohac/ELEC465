@@ -1,0 +1,10 @@
+All files can be compiled with:
+	g++ {.cpp} -o out (g++ codes.cpp -o codes)
+	
+running ./outFile will pring usage instructions
+
+Programs:
+
+codes.cpp - takes an input file and generates the code word lengths
+encoder.cpp - encodes a given input file using the generated codeword lengths
+decoder.cpp - decodes the compressed file

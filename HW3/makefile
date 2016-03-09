@@ -1,0 +1,12 @@
+CXX = g++
+CXXFLAGS = -std=c++11 -g3
+ENC_SOURCES = codes.cpp
+ENC_EXECUTABLE = codes
+
+all: $(ENC_EXECUTABLE)
+
+$(ENC_EXECUTABLE): $(ENC_SOURCES)
+	$(CXX) $(CXXFLAGS) $(ENC_SOURCES) -o $(ENC_EXECUTABLE)
+
+clean:
+	rm $(ENC_EXECUTABLE)

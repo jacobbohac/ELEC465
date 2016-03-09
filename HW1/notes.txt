@@ -1,0 +1,18 @@
+1.  	Plot the temperature data as a function of year number.
+	Use 1880 as year 0
+
+2. 	Fit a line through the data (ax+b) where x is the year and a and b are the
+	parameters you calculate.
+	
+3. 	Compute the differences between your model and the actual data and record
+	the mean squared values of the data and the differences.
+
+4. 	Predict the global average temperature for the year you turn 40.
+
+Turn in:
+	plots of the model
+	the data
+	values of a, b
+	forecast global temperature
+	one paragraph report
+	program for calculating a & b as an appendix
