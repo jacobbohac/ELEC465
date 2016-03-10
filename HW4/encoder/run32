@@ -1,0 +1,4 @@
+make -f makefile32 > /dev/null 2>&1;
+./encoder32 ../data/test.txt ../data/compressed.txt
+
+

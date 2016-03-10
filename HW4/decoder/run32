@@ -1,0 +1,4 @@
+make -f makefile32 > /dev/null 2>&1;
+./decoder32 ../data/compressed.txt ../data/decompressed.txt
+
+

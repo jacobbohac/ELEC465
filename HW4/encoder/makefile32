@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++11 -g3
-ENC_SOURCES = encoder.cpp
-ENC_EXECUTABLE = encoder
+ENC_SOURCES = encoder32.cpp
+ENC_EXECUTABLE = encoder32
 
 all: $(ENC_EXECUTABLE)
 

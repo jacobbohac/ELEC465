@@ -1,0 +1,4 @@
+./encoder/encoder /data/test.txt /data/compressed.txt;
+./decoder/decoder /data/test.txt /data/compressed.txt
+
+

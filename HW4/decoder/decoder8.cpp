@@ -21,6 +21,7 @@ struct CountStruct{
 char* inputBuffer;
 int curr_byte_of_buffer = 1; // First one gets used in tag initialization
 int curr_bit_of_byte = 0;
+int numCharsToDecode = 0;
 
 void decode(CountStruct* countStruct);
 void parseFile(string infileName, CountStruct* countStruct);
@@ -31,8 +32,7 @@ bool getE3state(uint8_t l, uint8_t u);
 bool getNextBit();
 string decodedString;
 
-const char *byte_to_binary(int x)
-{
+const char *byte_to_binary(int x){
     static char b[9];
     b[0] = '\0';
 
@@ -77,8 +77,14 @@ void parseFile(string infileName, CountStruct* countStruct){
 	    int a, b;
 	    if (iss >> a >> b) {
 	    	headerValues.push_back(make_pair(a,b));
-	    	cout << "a: " << a << "b: " << b << endl;
+	    	cout << "a: " << a << "b: " << b << endl;	    
 	    }else{
+	    	iss >> a;
+	    	numCharsToDecode = a;
+
+	    	getline(infile, line);
+	    	std::istringstream iss(line);
+	    	cout << line << endl;
 	    	dataString = line;
 	    }	   
 	}
@@ -117,8 +123,9 @@ void printCountStruct(CountStruct* countStruct){
 
 bool getNextBit(){
 	// There will be an exception when we reach the end of the buffer
+
 	char c = inputBuffer[curr_byte_of_buffer];
-	bool bit = (c >> curr_bit_of_byte) & 1;
+	bool bit = (c >> (7-curr_bit_of_byte)) & 1;
 
 	curr_bit_of_byte++;
 
@@ -126,7 +133,6 @@ bool getNextBit(){
 		curr_byte_of_buffer++;
 		curr_bit_of_byte = 0;
 	}
-
 	return bit;
 }
 
@@ -139,85 +145,68 @@ void decode(CountStruct* countStruct){
 	int totalCount = countStruct->totalCount;
 	int* cum_count = countStruct->cumCounts;
 
-	bool done = false;
-
 	t = inputBuffer[0];
 	cout << "\n\ntag: " << (int)t << " " << byte_to_binary(t) << endl;
 
-	while(!done){
-		cin.ignore();
+	while(1){
+
 		cout << "\n---------- loop --------------" << endl;
 		k = 0;
-		cout << "l: " << (int)l << " " << byte_to_binary(l) << endl;
-		cout << "u: " << (int)u << " " << byte_to_binary(u) << endl;
 
 		uint16_t first = t-l+1;
 		uint16_t second = u-l+1;
 
-		cout << "t-l+1 = " << first << endl;
-		cout << "u-l+1 = " << second << endl;
-		cout << "->  " << ((first*totalCount-1)/second) << endl;
-
-
+		cout << ((first*totalCount-1)/second) << endl;
 		while(((first*totalCount-1)/second) >= cum_count[k]){
 			k++;
 		}
 
 		k--;
-		cout << "k: " << (int)k << endl;
 
 		// decode symbol x
 		char x = (char)k;
-		cout << "x: " << x << endl;
 		decodedString += x;
 		cout << "\t\t Decoded String = " << decodedString << endl;
+		if(decodedString.size() == numCharsToDecode){break;}
 
 		uint16_t tmp = u-l+1;
-
-		cout << "\t(u-l+1) = " << (int)tmp << endl;
-		cout << "\tcum[x-1] = " << cum_count[x-1 + 1] << endl;
-		cout << "\tcum[x] = " << cum_count[x + 1] << endl;
 		uint8_t l_cpy = l;
 		l = l + (tmp*cum_count[x-1 + 1])/totalCount;
 		u = l_cpy + ((tmp*cum_count[x + 1])/totalCount) - 1;
 
 
-		cout << "l: " << (int)l << " " << byte_to_binary(l) << endl;
-		cout << "u: " << (int)u << " " << byte_to_binary(u) << endl;
-		cout << "tag: " << (int)t << " " << byte_to_binary(t) << endl;
-
-		cout << "l_msb: " << msb(l) << endl;
-		cout << "u_msb: " << msb(u) << endl;
-		cout << "e3state: " << getE3state(l,u) << endl;
+		
+		cout << "l: " << byte_to_binary(l) << " - " << (int)l << endl;
+		cout << "u: " << byte_to_binary(u) << " - " << (int)u << endl;
+		cout << "t: " << byte_to_binary(t) << " - " << (int)t << endl;
 
 		while((msb(l) == msb(u)) || getE3state(l,u)){
 			cout << endl;
 			if(msb(l) == msb(u)){
-				cout << "\tl_msb == u_msb == " << msb(l) << endl;
 				// shift l by 1 bit left, and shift 0 into LSB
 				l = l << 1;
-				l = l | 1;
+				l = l & 254;
 
 				// shift u by 1 bit left,  and shift 1 into LSB
 				u = u << 1;
-				u = u & 254;
+				u = u | 1;
 
 				// shift tag to the left by 1 and shift in next bit from bitstream
 				t = t << 1;
 				t |= getNextBit();
 
-				cout << "\tl: " << byte_to_binary(l) << endl;
-				cout << "\tu: " << byte_to_binary(u) << endl;
-				cout << "\ttag: " << byte_to_binary(t) << endl;
+				cout << "l: " << byte_to_binary(l) << " - " << (int)l << endl;
+				cout << "u: " << byte_to_binary(u) << " - " << (int)u << endl;
+				cout << "t: " << byte_to_binary(t) << " - " << (int)t << endl;
 			}
 			if(getE3state(l,u)){
 				// shift l by 1 bit left, and shift 0 into LSB
 				l = l << 1;
-				l = l | 1;
+				l = l & 254;
 
 				// shift u by 1 bit left,  and shift 1 into LSB
 				u = u << 1;
-				u = u & 254;
+				u = u | 1;
 
 				// shift tag to the left by 1 and shift in next bit from bitstream
 				// compliment (new) MSB of l, u, t
@@ -229,9 +218,9 @@ void decode(CountStruct* countStruct){
 				u = u ^ 128;
 				t = t ^ 128;
 
-				cout << "\tl: " << byte_to_binary(l) << endl;
-				cout << "\tu: " << byte_to_binary(u) << endl;
-				cout << "\ttag: " << byte_to_binary(t) << endl;
+				cout << "l: " << byte_to_binary(l) << " - " << (int)l << endl;
+				cout << "u: " << byte_to_binary(u) << " - " << (int)u << endl;
+				cout << "t: " << byte_to_binary(t) << " - " << (int)t << endl;
 			}
 		}
 	}
